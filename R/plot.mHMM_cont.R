@@ -136,7 +136,7 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
     }
     max<-0
     for(k in 1:m){
-      ylim_prep<-density(object$emiss_mu_bar[[dep]][,k])$y
+      ylim_prep<-density(object$emiss_mu_bar[[dep]][(1+burn_in):J,k])$y
       ylim1<-max(ylim_prep)
       if(ylim1>max){max<-ylim1}
     }
@@ -161,11 +161,11 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
       graphics::title(ylab="Density", line=.5)
       for(q in 1:m){
         # add density curve for population level posterior distribution
-        graphics::lines(stats::density(object$emiss_mu_bar[[dep]][,q]),
+        graphics::lines(stats::density(object$emiss_mu_bar[[dep]][(1+burn_in):J,q]),
                         type = "l", col = state_col[q], lwd = lwd1, lty = lty1)
         # add density curves for subject posterior distributions
         for(s in 1:n_subj){
-          graphics::lines(stats::density(object$PD_subj[[s]][,column_PD_subj[q]]),
+          graphics::lines(stats::density(object$PD_subj[[s]][(1+burn_in):J,column_PD_subj[q]]),
                           type = "l", col = state_col[q], lwd = lwd2, lty = lty2)
         }
       }
@@ -174,25 +174,25 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
 
 
 
-      var_data<-out_3st_cont_sim$emiss_varmu_bar[[dep]][-1,]
+      var_data<-object$emiss_var_bar[[dep]][-1,]
       sd_data<-sqrt(var_data)
-      sd_data_1<-quantile(sd_data,probs = c(0.01, 0.99))
-      xlim1_2<-sd_data_1[1]
-      xlim2_2<-sd_data_1[2]
+
+      xlim1_2<-min(sd_data)
+      xlim2_2<-max(sd_data)
       max<-0
       for(k in 1:m){
         ylim_prep<-density(sd_data[,k])$y
         ylim1<-max(ylim_prep)
         if(ylim1>max){max<-ylim1}
       }
-      graphics::plot.default(x = 1, ylim = c(0, max+0.1), xlim = c(xlim1_2,xlim2_2), type = "n",
+      graphics::plot.default(x = 1, ylim = c(0, max+0.1), xlim = c(xlim1_2-0.1,xlim2_2+0.1), type = "n",
                              main = paste(dep_lab, "stadard deviation distributions"),
                              yaxt = "n", ylab = "", xlab = "standard deviation ", ...)
       graphics::title(ylab="Density", line=.5)
 
       for(q in 1:m){
         # add density curve for population level posterior distribution
-        graphics::lines(stats::density(sd_data[,q]),
+        graphics::lines(stats::density(sd_data[burn_in:J-1,q]),
                         type = "l", col = state_col[q], lwd = lwd1, lty = lty1)
       }
       graphics::legend("topright", col = state_col, legend =paste("State", 1:m) , bty = 'n', lty = 1, lwd = 2, cex = .7)
