@@ -59,14 +59,17 @@
 #'
 #' @export
 #'
-plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col, cat_lab,
+plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
                       dep_lab, lwd1 = 2, lwd2 = 1, lty1 = 1, lty2 = 3,
                       legend_cex, burn_in, ...){
   if (!is.mHMM_cont(x)){
-    stop("The input object x should be from the class mHMM_cont, obtained with the function mHMM.")
+    stop("The input object x should be from the class mHMM_cont, obtained with the function mHMM_cont().")
   }
   if (component != "gamma" & component != "emiss"){
     stop("The input specified under component should be a string, restrectid to state either gamma or emiss.")
+  }
+  if(all(dep!=1:n_dep)==T){
+    stop("_dep_ is a number representing  dependent variable. It has to be positive and cannot be grater then number of dependent variables _n_dep_.")
   }
   object <- x
   input   <- x$input
@@ -82,7 +85,6 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col, cat_lab,
   old_par <- graphics::par(no.readonly =TRUE)
   on.exit(graphics::par(old_par))
   m       <- input$m
-  q_emiss <- input$q_emiss
   n_dep   <- input$n_dep
 
   if(component == "gamma"){
@@ -110,7 +112,7 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col, cat_lab,
         graphics::lines(stats::density(object$gamma_prob_bar[burn_in:J,m * (i-1) + j]),
                         type = "l", col = state_col[j], lwd = lwd1, lty = lty1)
         for(s in 1:n_subj){
-          graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(q_emiss * m) + m * (i-1) + j)]),
+          graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(n_dep * m)*2 + j)]),
                           type = "l", col = state_col[j], lwd = lwd2, lty = lty2)
         }
       }
@@ -118,15 +120,13 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col, cat_lab,
                        bty = 'n', lty = 1, lwd = 2, cex = .8)
     }
   } else if (component == "emiss"){
-    if (missing(cat_lab)){
-      cat_lab <- paste("Category", 1:q_emiss[dep])
-    } else {
-      if (!is.list(cat_lab) | length(cat_lab) != n_dep | sum(lengths(cat_lab) != q_emiss) > 0){
-        stop(paste0("cat_lab should be a list with n_dep (", n_dep, ") elements, each containing a vector with lengths ", paste(q_emiss, collapse = ", "), ", respectively"))
-      }
-      cat_lab <- cat_lab[[dep]]
+
+    if(all(dep!=1:n_dep)==T){
+      stop("_dep_ is a number representing  dependent variable. It has to be positive and cannot be grater then number of dependent variables _n_dep_.")
     }
-    if (missing(dep_lab)){
+
+
+      if (missing(dep_lab)){
       dep_lab <- input$dep_labels[dep]
     } else {
       if (!is.vector(dep_lab) | length(dep_lab) != n_dep){
@@ -134,42 +134,72 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col, cat_lab,
       }
       dep_lab <- dep_lab[dep]
     }
-    start <- c(0, q_emiss * m)
-    start2 <- c(0, seq(from = (q_emiss[dep]-1) * 2, to = (q_emiss[dep]-1) * 2 * m, by = (q_emiss[dep]-1) * 2))
+    max<-0
+    for(k in 1:m){
+      ylim_prep<-density(object$emiss_mu_bar[[dep]][,k])$y
+      ylim1<-max(ylim_prep)
+      if(ylim1>max){max<-ylim1}
+    }
+
+    xlim2<-max(object$emiss_mu_bar[[dep]])
+    xlim1<-min(object$emiss_mu_bar[[dep]])
+    column_PD_subj<-seq(1:m)+m*(dep-1)
+
     if (missing(col)){
-      cat_col <- grDevices::rainbow(q_emiss[dep])
+      state_col <- grDevices::rainbow(m)
     } else {
-      cat_col <- col
+      state_col <- col
     }
-    if(m > 3){
-      graphics::par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
-    } else {
-      graphics::par(mfrow = c(1,m), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
-    }
-    for(i in 1:m){
-      # determining the scale of the y axis
-      max <- 0
-      for(q in 1:q_emiss[dep]){
-        new <- max(stats::density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q])$y)
-        if(new > max){max <- new}
-      }
-      # set plotting area
-      graphics::plot.default(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n",
-                             main = paste(dep_lab, ", state", i),
-                             yaxt = "n", ylab = "", xlab = "Conditional probability", ...)
+
+    # set plotting area
+    graphics::par(mfrow = c(1,2), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+
+
+      graphics::plot.default(x = 1, ylim = c(0, max+0.1), xlim = c(xlim1-0.1,xlim2+0.1), type = "n",
+                             main = paste(dep_lab, "mean distribution"),
+                             yaxt = "n", ylab = "", xlab = "mean ", ...)
       graphics::title(ylab="Density", line=.5)
-      for(q in 1:q_emiss[dep]){
+      for(q in 1:m){
         # add density curve for population level posterior distribution
-        graphics::lines(stats::density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q]),
-                        type = "l", col = cat_col[q], lwd = lwd1, lty = lty1)
+        graphics::lines(stats::density(object$emiss_mu_bar[[dep]][,q]),
+                        type = "l", col = state_col[q], lwd = lwd1, lty = lty1)
         # add density curves for subject posterior distributions
-        for(s in 1:10){
-          graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(start[1:dep])
-                                                                        + (i-1)*q_emiss[dep] + q)]),
-                          type = "l", col = cat_col[q], lwd = lwd2, lty = lty2)
+        for(s in 1:n_subj){
+          graphics::lines(stats::density(object$PD_subj[[s]][,column_PD_subj[q]]),
+                          type = "l", col = state_col[q], lwd = lwd2, lty = lty2)
         }
       }
-      graphics::legend("topright", col = cat_col, legend = cat_lab, bty = 'n', lty = 1, lwd = 2, cex = .7)
-    }
+      graphics::legend("topright", col = state_col, legend =paste("State", 1:m) , bty = 'n', lty = 1, lwd = 2, cex = .7)
+
+
+
+
+      var_data<-out_3st_cont_sim$emiss_varmu_bar[[dep]][-1,]
+      sd_data<-sqrt(var_data)
+      sd_data_1<-quantile(sd_data,probs = c(0.01, 0.99))
+      xlim1_2<-sd_data_1[1]
+      xlim2_2<-sd_data_1[2]
+      max<-0
+      for(k in 1:m){
+        ylim_prep<-density(sd_data[,k])$y
+        ylim1<-max(ylim_prep)
+        if(ylim1>max){max<-ylim1}
+      }
+      graphics::plot.default(x = 1, ylim = c(0, max+0.1), xlim = c(xlim1_2,xlim2_2), type = "n",
+                             main = paste(dep_lab, "stadard deviation distributions"),
+                             yaxt = "n", ylab = "", xlab = "standard deviation ", ...)
+      graphics::title(ylab="Density", line=.5)
+
+      for(q in 1:m){
+        # add density curve for population level posterior distribution
+        graphics::lines(stats::density(sd_data[,q]),
+                        type = "l", col = state_col[q], lwd = lwd1, lty = lty1)
+      }
+      graphics::legend("topright", col = state_col, legend =paste("State", 1:m) , bty = 'n', lty = 1, lwd = 2, cex = .7)
+
+
+
+
+
   }
 }
