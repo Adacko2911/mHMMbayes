@@ -17,6 +17,10 @@
 #'   densities should be plotted. Only required if one wishes to plot the
 #'   emission distribution probabilities and the model is based on multiple
 #'   dependent variables.
+#' @param  trace_plot A logical parameter set to \code{FALSE} by default.
+#'   When set to \code{TRUE} the output
+#'   is a set of trace plots for either emission probabilities when
+#'   \code{component= "emiss"} or transition probabilities when \code{component= "gamma"}
 #' @param col Vector of colors for the posterior density lines. If one is
 #'   plotting the posterior densities for gamma, the vector has length \code{m}
 #'   (i.e., number of hidden states). If one is plotting the posterior densities
@@ -41,6 +45,7 @@
 #'   object with the function \code{\link{mHMM}} will be used.
 #' @param legend_cex A numerical value giving the amount by which plotting text
 #'   and symbols in the legend should be magnified relative to the default.
+
 #' @param ... Arguments to be passed to methods (see \code{\link[graphics]{par}})
 #'
 #' @return \code{plot.mHMM_cont} returns a plot of the posterior densities. Depending
@@ -61,7 +66,7 @@
 #'
 plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
                       dep_lab, lwd1 = 2, lwd2 = 1, lty1 = 1, lty2 = 3,
-                      legend_cex, burn_in, ...){
+                      legend_cex, burn_in, trace_plot=F ,...){
   if (!is.mHMM_cont(x)){
     stop("The input object x should be from the class mHMM_cont, obtained with the function mHMM_cont().")
   }
@@ -93,32 +98,60 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
     } else {
       state_col <- col
     }
+    col_st<-rep(state_col,m)
+
+    if(trace_plot==T){
+
+      graphics::par(mfrow = c(m,m),mar = c(4,3,3,1) + 0.1, mgp = c(2.2,1,0))
+      labels<-c()
+      for (k in 1:m) {
+        for (l in 1:m) {
+          labels<-c(labels,paste("From state ",k, "to state ",l))
+
+        }
+
+      }
+      for(i in 1:m^2){
+        median<-median(object$gamma_prob_bar[,i])
+        graphics::plot(x = 1:J, y = object$gamma_prob_bar[,i],
+                       ylim = c(0,1), las=1, type = "l", ylab = "Transition probability",
+                       xlab = "Iteration", main = labels[i],lwd = lwd1, lty = lty1,
+                       col=col_st[i])
+        graphics::abline(h=median,lwd = lwd1)
+
+      }
+
+
+    }else{
+
     if(m > 3){
-      graphics::par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      graphics::par(mfrow = c(2,ceiling(m/2)), mar = c(4,3,2,1) + 0.1, mgp = c(2,1,0))
     } else {
-      graphics::par(mfrow = c(1,m), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      graphics::par(mfrow = c(1,m), mar = c(4,3,2,1) + 0.1, mgp = c(2,1,0))
     }
     for(i in 1:m){
       max <- 0
-      for(j in 1:m){
-        new <- max(stats::density(object$gamma_prob_bar[burn_in:J, m * (i-1) + j])$y)
+      for(l in 1:m){
+        new <- max(stats::density(object$gamma_prob_bar[burn_in:J, m * (i-1) + l])$y)
         if(new > max){max <- new}
       }
       graphics::plot.default(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n", cex = .8,  main =
-                               paste("From state", i, "to state ..."), yaxt = "n", ylab = "",
-                             xlab = "Transition probability", ...)
+                               paste("From state", i, "to state ..."),las=1, ylab = "",
+                             xlab = "Transition probability", ,yaxt = "n",...)
       graphics::title(ylab="Density", line=.5)
       for(j in 1:m){
         graphics::lines(stats::density(object$gamma_prob_bar[burn_in:J,m * (i-1) + j]),
                         type = "l", col = state_col[j], lwd = lwd1, lty = lty1)
         for(s in 1:n_subj){
-          graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(n_dep * m)*2 + j)]),
+          graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(n_dep * m)*2+ m * (i-1) + j)]),
                           type = "l", col = state_col[j], lwd = lwd2, lty = lty2)
         }
       }
       graphics::legend("topright", col = state_col, legend = paste("To state", 1:m),
                        bty = 'n', lty = 1, lwd = 2, cex = .8)
     }
+    }
+
   } else if (component == "emiss"){
 
     if(all(dep!=1:n_dep)==T){
@@ -151,8 +184,42 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
       state_col <- col
     }
 
-    # set plotting area
-    graphics::par(mfrow = c(1,2), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+
+
+
+    if(trace_plot==TRUE){
+
+      var_data<-object$emiss_var_bar[[dep]][-1,]
+      sd_data<-sqrt(var_data)
+      max1<-max(object$emiss_mu_bar[[dep]][,1:m])
+      min1<-min(object$emiss_mu_bar[[dep]][,1:m])
+      max2<-max(sd_data)
+      min2<-min(sd_data)
+
+      graphics::par(mfrow = c(2,m), mar = c(4,3,3,1) + 0.1, mgp = c(2.2,1,0))
+      for(q in 1:m){
+        median_mean<-median(object$emiss_mu_bar[[dep]][,q])
+        graphics::plot.default(x = 1:J, y = object$emiss_mu_bar[[dep]][,q],las=1, type = "l",
+                             ylim=c(min1,max1),lwd = lwd1, lty = lty1,
+                             main = paste(dep_lab, ", State ", q),
+                             xlab = "Iteration", ylab="Mean",col=state_col[q])
+        graphics::abline(h=median_mean, lwd=2)
+      }
+
+      for(k in 1:m){
+        # add density curve for population level posterior distribution
+        median_sd<-median(sd_data[,k])
+        graphics::plot(x=1:(J-1),sd_data[,k], las=1,
+                        type = "l", lwd = lwd1, lty = lty1,
+                       ylim=c(min2,max2),
+                       main = paste(dep_lab, ", State ", q),
+                       xlab = "Iteration", ylab="Standard deviation",col=state_col[k])
+        graphics::abline(h=median_sd,lwd=2)
+      }
+
+    }else{
+      # set plotting area
+      graphics::par(mfrow = c(1,2), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
 
 
       graphics::plot.default(x = 1, ylim = c(0, max+0.1), xlim = c(xlim1-0.1,xlim2+0.1), type = "n",
@@ -170,7 +237,6 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
         }
       }
       graphics::legend("topright", col = state_col, legend =paste("State", 1:m) , bty = 'n', lty = 1, lwd = 2, cex = .7)
-
 
 
 
@@ -201,5 +267,13 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
 
 
 
+    }
   }
+
+
+
+
+
+
+
 }

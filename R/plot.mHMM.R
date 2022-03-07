@@ -17,6 +17,11 @@
 #'   densities should be plotted. Only required if one wishes to plot the
 #'   emission distribution probabilities and the model is based on multiple
 #'   dependent variables.
+#' @param  trace_plot A logical parameter set to \code{FALSE} by default.
+#'   When set to \code{TRUE} the output
+#'   is a set of trace plots for either emission probabilities when
+#'   \code{component= "emiss"} or transition probabilities when
+#'    \code{component= "gamma"}
 #' @param col Vector of colors for the posterior density lines. If one is
 #'   plotting the posterior densities for gamma, the vector has length \code{m}
 #'   (i.e., number of hidden states). If one is plotting the posterior densities
@@ -89,20 +94,20 @@
 #'
 plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
                       dep_lab, lwd1 = 2, lwd2 = 1, lty1 = 1, lty2 = 3,
-                      legend_cex, burn_in, ...){
+                      legend_cex, burn_in, trace_plot=F ,...){
   if (!is.mHMM(x)){
     stop("The input object x should be from the class mHMM, obtained with the function mHMM.")
   }
   if (component != "gamma" & component != "emiss"){
     stop("The input specified under component should be a string, restrectid to state either gamma or emiss.")
   }
-  object <- x
-  input   <- x$input
-  n_subj  <- input$n_subj
+  object<- x
+  input <- x$input
+  n_subj<- input$n_subj
   if (missing(burn_in)){
     burn_in <- input$burn_in
   }
-  J       <- input$J
+  J <- input$J
   if (burn_in >= (J-1)){
     stop(paste("The specified burn in period should be at least 2 points smaller
                compared to the number of iterations J, J =", J))
@@ -119,7 +124,34 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
     } else {
       state_col <- col
     }
-    if(m > 3){
+
+    if(trace_plot==TRUE){
+      col_st<-rep(state_col,m)
+      nr_st<-m^2
+      nr_row<-m+1
+      n_col<-m
+      graphics::par(mfrow = c(m,m),mar = c(4,3,3,1) + 0.1, mgp = c(2.2,1,0))
+      labels<-c()
+      for (k in 1:m) {
+        for (l in 1:m) {
+          labels<-c(labels,paste("From state ",k, "to state ",l))
+
+        }
+
+      }
+      for(i in 1:m^2){
+        median<-median(object$gamma_prob_bar[,i])
+        graphics::plot(x = 1:J, y = object$gamma_prob_bar[,i],
+                       ylim = c(0,1), las=1, type = "l", ylab = "Transition probability",
+                       xlab = "Iteration", main = labels[i],lwd = lwd1, lty = lty1,
+                       col=col_st[i])
+        graphics::abline(h=median,lwd = lwd1)
+
+      }
+
+
+    }else{
+      if(m > 3){
       graphics::par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
     } else {
       graphics::par(mfrow = c(1,m), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
@@ -145,6 +177,8 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       graphics::legend("topright", col = state_col, legend = paste("To state", 1:m),
              bty = 'n', lty = 1, lwd = 2, cex = .8)
     }
+    }
+
   } else if (component == "emiss"){
     if (missing(cat_lab)){
       cat_lab <- paste("Category", 1:q_emiss[dep])
@@ -164,11 +198,38 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
     }
     start <- c(0, q_emiss * m)
     start2 <- c(0, seq(from = (q_emiss[dep]-1) * 2, to = (q_emiss[dep]-1) * 2 * m, by = (q_emiss[dep]-1) * 2))
+
     if (missing(col)){
       cat_col <- grDevices::rainbow(q_emiss[dep])
     } else {
       cat_col <- col
     }
+    tr_col<-rep(cat_col,m)
+
+    if(trace_plot==T){
+      labs<-c()
+      labs_s<-c()
+      for (l in 1:m) {
+       for (cat in 1:q_emiss[dep]) {
+          labs<-paste(dep_lab," ",cat_lab[cat] ,", State",l)
+          labs_s<-c(labs_s,labs)
+       }
+
+      }
+
+      graphics::par(mfrow = c(m,q_emiss[dep]),mar = c(4,3,3,1) + 0.1, mgp = c(2.2,1,0))
+
+      for(q in 1:(q_emiss[dep]*m)){
+        median<-median(object$emiss_prob_bar[[dep]][,q])
+        graphics::plot(x = 1:J, y=object$emiss_prob_bar[[dep]][,q],
+                       ylim = c(0,1), las=1, type = "l", ylab = "Emission Probability",
+                       xlab = "Iteration",lwd = lwd1, lty = lty1, main=labs_s[q],col=tr_col[q])
+        graphics::abline(h=median,lwd=2)
+      }
+
+    }else{
+
+
     if(m > 3){
       graphics::par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
     } else {
@@ -182,7 +243,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         if(new > max){max <- new}
       }
       # set plotting area
-      graphics::plot.default(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n",
+      graphics::plot.default(x = 1, ylim = c(0, max+0.1), xlim = c(0,1), type = "n",
            main = paste(dep_lab, ", state", i),
            yaxt = "n", ylab = "", xlab = "Conditional probability", ...)
       graphics::title(ylab="Density", line=.5)
@@ -191,7 +252,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         graphics::lines(stats::density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q]),
               type = "l", col = cat_col[q], lwd = lwd1, lty = lty1)
         # add density curves for subject posterior distributions
-        for(s in 1:10){
+        for(s in 1:n_subj){
           graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(start[1:dep])
                                                      + (i-1)*q_emiss[dep] + q)]),
                 type = "l", col = cat_col[q], lwd = lwd2, lty = lty2)
@@ -200,4 +261,8 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       graphics::legend("topright", col = cat_col, legend = cat_lab, bty = 'n', lty = 1, lwd = 2, cex = .7)
     }
   }
+
+    }
+
+
 }
