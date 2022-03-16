@@ -66,7 +66,7 @@
 #'
 plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
                       dep_lab, lwd1 = 2, lwd2 = 1, lty1 = 1, lty2 = 3,
-                      legend_cex, burn_in, trace_plot=F ,...){
+                      legend_cex, burn_in, trace_plot=FALSE ,...){
   if (!is.mHMM_cont(x)){
     stop("The input object x should be from the class mHMM_cont, obtained with the function mHMM_cont().")
   }
