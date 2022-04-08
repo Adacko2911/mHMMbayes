@@ -174,8 +174,8 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
       if(ylim1>max){max<-ylim1}
     }
 
-    xlim2<-max(object$emiss_mu_bar[[dep]])
-    xlim1<-min(object$emiss_mu_bar[[dep]])
+    xlim2<-max(object$emiss_mu_bar[[dep]][-c(1:burn_in),])
+    xlim1<-min(object$emiss_mu_bar[[dep]][-c(1:burn_in),])
     column_PD_subj<-seq(1:m)+m*(dep-1)
 
     if (missing(col)){
@@ -243,8 +243,8 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
       var_data<-object$emiss_var_bar[[dep]][-1,]
       sd_data<-sqrt(var_data)
 
-      xlim1_2<-min(sd_data)
-      xlim2_2<-max(sd_data)
+      xlim1_2<-min(sd_data[-c(1:burn_in-1),])
+      xlim2_2<-max(sd_data[-c(1:burn_in-1),])
       max<-0
       for(k in 1:m){
         ylim_prep<-density(sd_data[,k])$y
