@@ -331,7 +331,7 @@
 #'                              1.0, 0.2,
 #'                              2.0, 0.1), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = c('continuous','continuous'),
 #'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
 #'
 #' # Specify hyper-prior for the continuous emission distribution
