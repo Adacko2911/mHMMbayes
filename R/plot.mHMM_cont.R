@@ -67,6 +67,13 @@
 plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
                       dep_lab, lwd1 = 2, lwd2 = 1, lty1 = 1, lty2 = 3,
                       legend_cex, burn_in, trace_plot=FALSE ,...){
+
+  object <- x
+  input   <- x$input
+  n_subj  <- input$n_subj
+  m       <- input$m
+  n_dep   <- input$n_dep
+
   if (!is.mHMM_cont(x)){
     stop("The input object x should be from the class mHMM_cont, obtained with the function mHMM_cont().")
   }
@@ -76,9 +83,7 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
   if(all(dep!=1:n_dep)==T){
     stop("_dep_ is a number representing  dependent variable. It has to be positive and cannot be grater then number of dependent variables _n_dep_.")
   }
-  object <- x
-  input   <- x$input
-  n_subj  <- input$n_subj
+
   if (missing(burn_in)){
     burn_in <- input$burn_in
   }
@@ -89,8 +94,6 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
   }
   old_par <- graphics::par(no.readonly =TRUE)
   on.exit(graphics::par(old_par))
-  m       <- input$m
-  n_dep   <- input$n_dep
 
   if(component == "gamma"){
     if (missing(col)){
@@ -107,9 +110,7 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
       for (k in 1:m) {
         for (l in 1:m) {
           labels<-c(labels,paste("From state ",k, "to state ",l))
-
         }
-
       }
       for(i in 1:m^2){
         median<-median(object$gamma_prob_bar[,i])
@@ -118,10 +119,7 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
                        xlab = "Iteration", main = labels[i],lwd = lwd1, lty = lty1,
                        col=col_st[i])
         graphics::abline(h=median,lwd = lwd1)
-
       }
-
-
     }else{
 
     if(m > 3){
@@ -151,7 +149,6 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
                        bty = 'n', lty = 1, lwd = 2, cex = .8)
     }
     }
-
   } else if (component == "emiss"){
 
     if(all(dep!=1:n_dep)==T){
@@ -183,10 +180,6 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
     } else {
       state_col <- col
     }
-
-
-
-
     if(trace_plot==TRUE){
 
       var_data<-object$emiss_var_bar[[dep]][-1,]
@@ -212,7 +205,7 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
         graphics::plot(x=1:(J-1),sd_data[,k], las=1,
                         type = "l", lwd = lwd1, lty = lty1,
                        ylim=c(min2,max2),
-                       main = paste(dep_lab, ", State ", q),
+                       main = paste(dep_lab, ", State ", k),
                        xlab = "Iteration", ylab="Standard deviation",col=state_col[k])
         graphics::abline(h=median_sd,lwd=2)
       }
@@ -262,18 +255,8 @@ plot.mHMM_cont <- function(x, component = "gamma", dep = 1, col,
                         type = "l", col = state_col[q], lwd = lwd1, lty = lty1)
       }
       graphics::legend("topright", col = state_col, legend =paste("State", 1:m) , bty = 'n', lty = 1, lwd = 2, cex = .7)
-
-
-
-
-
+}
     }
   }
 
 
-
-
-
-
-
-}
