@@ -1,0 +1,59 @@
+url: ~
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#1375bd"
+authors:
+  Emmeke Aarts:
+    href: xxx
+news:
+  cran_dates: true
+
+intro:
+  - title: "Getting started"
+    contents:
+    - tutorial-mhmm.Rdm
+
+reference:
+  - title: Main functions
+    desc:  Essential functionality
+    contents:
+      - mHMM
+      - sim_mHMM
+      - vit_mHMM
+  - title: Show results
+    desc: Functions working with mHMM objects
+    contents:
+      - plot.mHMM
+      - plot.mHMM_gamma
+  - title: Datasets and known results
+    contents:
+      - nonverbal
+      - nonverbal_cov
+  - title: Helper functions mainly used internally
+    contents:
+      - prob_to_int
+      - int_to_prob
+      - mHMMbayes
+      - obtain_emiss
+      - obtain_gamma
+      - pd_RW_emiss_cat
+      - pd_RW_gamma
+      - prior_emiss_cat
+      - prior_gamma
+navbar:
+  title: ~
+  type: default
+  left:
+    - text: Getting started
+      href: articles/tutorial-mhmm.html
+    - text: Functions and data
+      href: reference/index.html
+    - text: Articles
+      menu:
+      - text: Tutorial mHMM
+        href: articles/tutorial-mhmm.html
+      - text: Estimation of mHMM
+        href: articles/testimation-mhmm.html
+    - text: News
+      href: news/index.html
