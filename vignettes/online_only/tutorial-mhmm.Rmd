@@ -2,19 +2,31 @@
 title: "Multilevel HMM tutorial"
 author: 
   name: "Emmeke Aarts"
-  affiliation: "Department of Methodology and Statistics, Utrecht University, Utrecht, the Netherlands <br>"
-abstract: >
-    With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models. The multilevel hidden Markov model (HMM) is a generalization of the well-known hidden Markov model, tailored to accommodate (intense) longitudinal data of multiple individuals simultaneously. Using a multilevel framework, we allow for heterogeneity in the model parameters (transition probability matrix and conditional distribution), while estimating one overall HMM. The model has a great potential of application in many fields, such as the social sciences and medicine. The model can be fitted on multivariate data with a categorical distribution, and include individual level covariates (allowing for e.g., group comparisons on model parameters). Parameters are estimated using Bayesian estimation utilizing the forward-backward recursion within a hybrid Metropolis within Gibbs sampler. The package also includes a function to simulate data and a function to obtain the most likely hidden state sequence for each individual using the Viterbi algorithm. 
-output: 
-  rmarkdown::html_vignette:
-    mathjax: default
 bibliography: bibliography.bib
+link-citations: yes
+abstract: >
+    With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models. The multilevel hidden Markov model (HMM) is a generalization of the well-known hidden Markov model, tailored to accommodate (intense) longitudinal data of multiple individuals simultaneously. Using a multilevel framework, we allow for heterogeneity in the model parameters (transition probability matrix and conditional distribution), while estimating one overall HMM. The model has a great potential of application in many fields, such as the social sciences and medicine. The model can be fitted on multivariate data with a categorical distribution, and include individual level covariates (allowing for e.g., group comparisons on model parameters). Parameters are estimated using Bayesian estimation utilizing the forward-backward recursion within a hybrid Metropolis within Gibbs sampler. The package also includes a function to simulate data and a function to obtain the most likely hidden state sequence for each individual using the Viterbi algorithm
+header-includes:
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyfoot[CO,CE]{Vignette to the R package `mHMMbayes`}
+- \fancyfoot[LE,LO]{E. Aarts}
+- \fancyfoot[RE,RO]{\thepage}
+output: 
+  pdf_document:
+  citation_package: biblatex    
 vignette: >
   %\VignetteIndexEntry{Multilevel HMM tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  % \VignetteDepends{RColorBrewer}
 ---
+
+---
+nocite: |
+  @zucchini2016
+...
+
+
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -92,7 +104,7 @@ old_par <- graphics::par(no.readonly =TRUE)
 
 When we plot the data of the first 5 minutes (= the first 300 observations) of the first couple, we get the following: 
 
-```{r plot observed data, fig.width = 7.2, fig.height = 3.5, echo = FALSE,warning=FALSE}
+```{r plot observed data, fig.width = 7.2, fig.height = 3.5, echo = FALSE}
 # set labels and colors for the observed behavioral categorical outcomes
 library(RColorBrewer)
 Voc_lab <- c("Not Speaking", "Speaking", "Back channeling")
@@ -401,6 +413,7 @@ It can be observed that the parameter estimates converge to the same parameter s
 graphics::par(old_par)
 ```
 ## References
+\bibliography{bibliography.bib}
 
 </div>
 

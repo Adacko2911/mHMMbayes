@@ -4,8 +4,10 @@
 # mHMMbayes <a> <img src="man/figures/logo.png" align="right" height="120" /> </a>
 
 <!-- badges: start -->
+
 [![CRAN
 Status](https://www.r-pkg.org/badges/version/mHMMbayes)](https://cran.r-project.org/package=mHMMbayes)
+[![](https://cranlogs.r-pkg.org/badges/mHMMbayes)](https://cran.r-project.org/package=mHMMbayes)
 <!-- badges: end -->
 
 <div style="text-align: justify;">

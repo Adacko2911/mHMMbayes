@@ -15,7 +15,9 @@ knitr::opts_chunk$set(
 # mHMMbayes <a> <img src="man/figures/logo.png" align="right" height="120" /> </a>
 <!-- badges: start -->
 [![CRAN Status](https://www.r-pkg.org/badges/version/mHMMbayes)](https://cran.r-project.org/package=mHMMbayes)
+[![](https://cranlogs.r-pkg.org/badges/mHMMbayes)](https://cran.r-project.org/package=mHMMbayes)
 <!-- badges: end -->
+
 <div style="text-align: justify;">
   With the \code{R} package mHMMbayes you can fit multilevel hidden Markov 
   models. The multilevel hidden Markov model (HMM) is a generalization of the 
@@ -49,12 +51,12 @@ devtools::install_github("emmekeaarts/mHMMbayes")
 ## Usage
 This is a basic example which shows you how to run the model using example data 
 included with the package, and how to simulate data. For a more elaborate
-introduction, see the `vignette("tutorial-mhmm")` accompanying the package.
+introduction, see the `vignette("tutorial-mhmm")` accompanying the package or see the [Getting stared tutorial](vignettes/online_only/get_started.html).
 
 ```{r example}
 library(mHMMbayes)
+# 2 state model
 
-##### Simple 2 state model
 # specifying general model properties
 m <- 2
 n_dep <- 4
@@ -88,6 +90,7 @@ out_2st
 summary(out_2st)
 
 # Run a model including a covariate 
+
 # Here, the covariate (standardized CDI change) predicts the emission 
 # distribution for each of the 4 dependent variables:
 n_subj <- 10
@@ -101,7 +104,13 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
                  mcmc = list(J = 11, burn_in = 5))
 
  
- ### Simulating data
+
+```
+
+
+```{r}
+# Simulating data
+
 # simulating data for 10 subjects with each 100 observations
 n_t     <- 100
 n       <- 10
@@ -124,9 +133,9 @@ head(data1$obs)
 head(data1$states)
 
 
-
-# simulating subject specific transition probability matrices
+# Simulating subject-specific transition probability matrices
 # and emission distributions only
+
 n_t <- 0
 n <- 5
 m <- 3
@@ -146,13 +155,5 @@ data2 <- sim_mHMM(n_t = n_t, n = n,
                   gamma = gamma, emiss_distr = emiss_distr, 
                   var_gamma = 1, var_emiss = 1)
 data2
-
-set.seed(10893)
-data3 <- sim_mHMM(n_t = n_t, n = n, 
-                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                  gamma = gamma, emiss_distr = emiss_distr, 
-                  var_gamma = .5, var_emiss = .5)
-data3
-
 ```
 

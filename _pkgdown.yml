@@ -46,14 +46,14 @@ navbar:
   type: default
   left:
     - text: Getting started
-      href: articles/tutorial-mhmm.html
+      href: articles/online_only/get_started.html
     - text: Functions and data
       href: reference/index.html
     - text: Articles
       menu:
       - text: Tutorial mHMM
-        href: articles/tutorial-mhmm.html
+        href: articles/online_only/tutorial-mhmm.html
       - text: Estimation of mHMM
-        href: articles/testimation-mhmm.html
+        href: articles/online_only/estimation-mhmm.html
     - text: News
       href: news/index.html
