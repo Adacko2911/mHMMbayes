@@ -1,0 +1,11 @@
+pandoc: 2.11.4
+pkgdown: 2.0.6
+pkgdown_sha: ~
+articles:
+  estimation-mhmm: estimation-mhmm.html
+  estimation-mhmm: online_only/estimation-mhmm.html
+  get_started: online_only/get_started.html
+  tutorial-mhmm: online_only/tutorial-mhmm.html
+  tutorial-mhmm: tutorial-mhmm.html
+last_built: 2023-07-04T21:56Z
+
